@@ -7,8 +7,8 @@
 <meta name="description" content="How long have you been avoiding it?">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js">
-  const SUPABASE_URL = 'https://evqsrwsyxgeskmbjsiud.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV2cXNyd3N5eGdlc2ttYmpzaXVkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwODIyMDAsImV4cCI6MjEwNTY1ODIwMH0.WUhawaRfLvb-NmgSZMB67lAvms0PiH2ZcKTYXjP-saQ';
+   const SUPABASE_URL = 'https://evqsrwsyxgeskmbjsiud.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsIn
 </script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -251,8 +251,10 @@ footer a:hover{color:var(--text)}
 // Example:
 // const SUPABASE_URL = 'https://abcdefgh.supabase.co';
 // const SUPABASE_ANON_KEY = 'eyJhbGciOi...longkey...';
+// Your URL is: https://evqsrwsyxgeskmbjsiud.supabase.co
+// Paste your full anon key inside the second quotes.
 
-const SUPABASE_URL = 'https://YOUR_PROJECT_ID.supabase.co';
+const SUPABASE_URL = 'https://evqsrwsyxgeskmbjsiud.supabase.co';
 const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY_HERE';
 
 let supabaseClient = null;
@@ -364,6 +366,14 @@ async function supabaseCheckUsername(u){
   if(!supabaseClient) return {available:true};
   try{ const {data} = await supabaseClient.from('users').select('username').eq('username',u).limit(1); return {available:data.length===0}; }catch{ return {available:true}; }
 }
+async function supabaseGetUserHistory(username){
+  if(!supabaseClient || !username) return null;
+  try{
+    const {data, error} = await supabaseClient.from('sessions').select('*').eq('username', username).order('created_at', {ascending:false}).limit(20);
+    if(error) throw error;
+    return data;
+  }catch(e){ console.log('get user history error', e); return null; }
+}
 
 function addUserLocal(u){
   const users=loadUsers();
@@ -390,21 +400,52 @@ function addToHistory(task,dur,username){
   renderLeaderboard();
   if(supabaseClient){ supabaseAddSession(username,task,dur); supabaseAddUser(username); }
 }
-function renderHistory(){
-  const hist=loadHistory();
+async function renderHistory(){
+  // Try global history for current username first
+  let hist = [];
+  let isGlobal = false;
+  const activeUser = currentUser || usernameInput.value.trim() || localStorage.getItem('procrastination_current_user');
+
+  if(supabaseClient && activeUser){
+    const globalHist = await supabaseGetUserHistory(activeUser);
+    if(globalHist && globalHist.length>0){
+      hist = globalHist.map(r=>({
+        task: r.task,
+        durationSec: r.duration_sec,
+        ts: new Date(r.created_at).getTime(),
+        username: r.username
+      }));
+      isGlobal = true;
+    }
+  }
+  if(hist.length===0){
+    hist = loadHistory();
+    // filter by active user if we have one, to show only yours locally too
+    if(activeUser){
+      const filtered = hist.filter(h=>h.username===activeUser);
+      if(filtered.length>0) hist = filtered;
+    }
+  }
+
   const last5=hist.slice(0,5);
   historyList.innerHTML='';
-  if(last5.length===0){ historyList.innerHTML='<div class="empty-history">No crimes yet.</div>'; totalsEl.innerHTML=''; if(totalWastedLabel) totalWastedLabel.textContent=''; return; }
+  if(last5.length===0){
+    historyList.innerHTML=`<div class="empty-history">No crimes yet.${supabaseClient?'':' Add Supabase keys for global history.'}</div>`;
+    totalsEl.innerHTML='';
+    if(totalWastedLabel) totalWastedLabel.textContent='';
+    return;
+  }
   last5.forEach(item=>{
     const div=document.createElement('div');
     div.className='history-item';
-    div.innerHTML=`<div class="left"><div class="task">${esc(item.task)}</div><div class="meta"><span>${esc(item.username||'anon')}</span><span>${fmtRel(item.ts)}</span></div></div><div class="dur">${fmtHuman(item.durationSec)}</div>`;
+    const ts = item.ts || Date.now();
+    div.innerHTML=`<div class="left"><div class="task">${esc(item.task)}</div><div class="meta"><span>${esc(item.username||'anon')}</span><span>${fmtRel(ts)}</span><span>${isGlobal?'global':'local'}</span></div></div><div class="dur">${fmtHuman(item.durationSec)}</div>`;
     historyList.appendChild(div);
   });
   const total=hist.reduce((a,b)=>a+b.durationSec,0);
   const avg=hist.length?Math.round(total/hist.length):0;
   const longest=hist.length?Math.max(...hist.map(h=>h.durationSec)):0;
-  totalsEl.innerHTML=`<span><b>Total</b> ${fmtHuman(total)} wasted</span><span><b>Avg</b> ${fmtHuman(avg)}</span><span><b>Longest</b> ${fmtHuman(longest)}</span>`;
+  totalsEl.innerHTML=`<span><b>Total</b> ${fmtHuman(total)} wasted</span><span><b>Avg</b> ${fmtHuman(avg)}</span><span><b>Longest</b> ${fmtHuman(longest)}</span><span><b>${isGlobal?'Global':'Local'}</b> for ${esc(activeUser||'you')}</span>`;
   if(totalWastedLabel) totalWastedLabel.textContent = `${fmtHuman(total)} total`;
 }
 async function renderLeaderboard(){
