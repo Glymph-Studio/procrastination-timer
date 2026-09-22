@@ -1,8 +1,8 @@
-# Procrastination Timer
+# Procrastination Timer - Glymph Studio
 
 > How long have you been avoiding it?
 
-Live: `procrast.glymph1.vercel.app`
+Live: `procrastination.glymph.vercel.app`
 Built by [@Yash-Tripath1](https://github.com/Yash-Tripath1) for Glymph Studio
 
 ### Features
@@ -26,4 +26,6 @@ git add .
 git commit -m "feat: procrastination timer"
 git push
 ```
+Vercel auto-deploys.
+
 Built by Glymph Studio - glymph.vercel.app

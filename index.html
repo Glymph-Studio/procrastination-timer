@@ -1,166 +1,138 @@
+const SUPABASE_URL = 'https://evqsrwsyxgeskmbjsiud.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV2cXNyd3N5eGdlc2ttYmpzaXVkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwODIyMDAsImV4cCI6MjEwNTY1ODIwMH0.WUhawaRfLvb-NmgSZMB67lAvms0PiH2ZcKTYXjP-saQ';
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Procrastination Timer - Glymph Studio</title>
-<meta name="description" content="How long have you been avoiding it? A shame timer by Glymph Studio.">
+<meta name="description" content="How long have you been avoiding it? Global shame leaderboard by Glymph Studio.">
 <meta name="author" content="Yash-Tripath1">
-<meta name="theme-color" content="#fefefe">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --bg:#fefefe;
-  --bg2:#f6f5f3;
-  --bg3:#ffffff;
-  --text:#111111;
-  --muted:#8a8a8a;
-  --muted2:#b8b5b0;
-  --line:#eceae6;
-  --line2:#e6e2de;
-  --red:#e11d48;
-  --red2:#be123c;
-  --redbg:#fff1f2;
-  --shadow:0 4px 24px rgba(0,0,0,0.04);
-  --shadow2:0 12px 40px rgba(0,0,0,0.08);
-  --radius:16px;
-  --radius2:12px;
+  --bg:#fefefe;--bg2:#f6f5f3;--bg3:#ffffff;--text:#111;--muted:#8a8a8a;--muted2:#b8b5b0;--line:#eceae6;--line2:#e6e2de;--red:#e11d48;--red2:#be123c;--redbg:#fff1f2;--redblink:rgba(225,29,72,0.12);--shadow:0 4px 24px rgba(0,0,0,0.04);--shadow2:0 12px 40px rgba(0,0,0,0.08)
 }
 [data-theme="dark"]{
-  --bg:#0a0a0a;
-  --bg2:#171717;
-  --bg3:#1e1e1e;
-  --text:#f5f3f0;
-  --muted:#8a8a8a;
-  --muted2:#5a5a5a;
-  --line:#222222;
-  --line2:#2a2a2a;
-  --red:#ff3b5c;
-  --red2:#e11d48;
-  --redbg:#1a0a0f;
-  --shadow:0 4px 24px rgba(0,0,0,0.3);
-  --shadow2:0 12px 40px rgba(0,0,0,0.5);
+  --bg:#0a0a0a;--bg2:#171717;--bg3:#1e1e1e;--text:#f5f3f0;--muted:#8a8a8a;--muted2:#5a5a5a;--line:#222;--line2:#2a2a2a;--red:#ff3b5c;--red2:#e11d48;--redbg:#1a0a0f;--redblink:rgba(255,59,92,0.18);--shadow:0 4px 24px rgba(0,0,0,0.3);--shadow2:0 12px 40px rgba(0,0,0,0.5)
 }
-html,body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Geist","Inter","Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;min-height:100vh;transition:background-color 0.25s,color 0.25s}
+html,body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,Geist,Inter,Segoe UI,Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;min-height:100vh;transition:background-color 0.25s,color 0.25s;overflow-x:hidden}
 button{font-family:inherit;-webkit-tap-highlight-color:transparent}
-.app{max-width:680px;margin:0 auto;padding:20px 20px 40px 20px;min-height:100vh;display:flex;flex-direction:column}
-.top{padding:16px 2px 12px 2px;display:flex;justify-content:space-between;align-items:center;gap:12px}
-.logo{font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);font-weight:700;display:flex;align-items:center;gap:10px}
-.logo b{color:var(--text);letter-spacing:0.18em}
-.top-right{display:flex;align-items:center;gap:12px}
-.total-label{font-size:11px;color:var(--muted2);letter-spacing:0.02em;font-weight:500}
+.app{width:100%;min-height:100vh;display:flex;flex-direction:column}
+.top{padding:18px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--bg);z-index:10;backdrop-filter:saturate(1.2) blur(8px)}
+.logo{font-size:11px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.logo b{color:var(--text)}
+.top-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.pill{font-size:11px;font-weight:600;padding:6px 10px;border-radius:20px;background:var(--bg2);border:1px solid var(--line);color:var(--muted)}
+.pill.red{color:var(--red);border-color:var(--red);background:var(--redbg)}
 .theme-btn{width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:var(--bg2);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s}
 .theme-btn:hover{border-color:var(--text);color:var(--text);background:var(--bg3)}
-.main{flex:1;display:flex;flex-direction:column;justify-content:center;padding:20px 0;position:relative}
-.screen{display:none;opacity:0;transform:translateY(8px);transition:opacity 0.35s ease,transform 0.35s ease}
-.screen.active{display:flex;flex-direction:column;opacity:1;transform:translateY(0)}
-.landing .eyebrow{font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);font-weight:650;margin-bottom:14px;display:flex;align-items:center;gap:8px}
-.eyebrow::before{content:'';width:20px;height:1px;background:var(--line2);display:inline-block}
-.label{font-size:14px;color:var(--muted);margin-bottom:16px;letter-spacing:0.01em;line-height:1.4}
-.input-wrap{position:relative}
-.task-input{width:100%;font-size:19px;line-height:1.35;padding:18px 18px;background:var(--bg2);border:1.5px solid var(--line);border-radius:var(--radius);outline:none;color:var(--text);font-weight:550;transition:all 0.2s;box-shadow:var(--shadow)}
+.main{flex:1;display:flex;flex-direction:column;width:100%;max-width:720px;margin:0 auto;padding:24px 20px}
+.screen{display:none;opacity:0;transform:translateY(10px);transition:opacity 0.4s ease,transform 0.4s cubic-bezier(0.16,1,0.3,1)}
+.screen.active{display:flex;flex-direction:column;opacity:1;transform:translateY(0);animation:screenIn 0.45s cubic-bezier(0.16,1,0.3,1)}
+@keyframes screenIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.label{font-size:15px;color:var(--muted);margin-bottom:18px;line-height:1.4}
+.input-group{margin-bottom:14px}
+.input-label{font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);font-weight:650;margin-bottom:8px;display:block}
+.task-input{width:100%;font-size:19px;line-height:1.35;padding:18px 18px;background:var(--bg2);border:1.5px solid var(--line);border-radius:14px;outline:none;color:var(--text);font-weight:600;transition:all 0.2s;box-shadow:var(--shadow)}
 .task-input:focus{border-color:var(--text);background:var(--bg3);box-shadow:var(--shadow2);transform:translateY(-1px)}
 .task-input::placeholder{color:var(--muted2);font-weight:450}
-.char-row{display:flex;justify-content:space-between;align-items:center;margin-top:10px}
-.char-count{font-size:11px;color:var(--muted2);letter-spacing:0.02em}
-.char-count.warn{color:var(--red)}
-.start-btn{margin-top:22px;width:100%;font-size:17px;font-weight:700;letter-spacing:-0.01em;padding:18px 22px;background:var(--text);color:var(--bg);border:none;border-radius:var(--radius);cursor:pointer;transition:all 0.2s;box-shadow:var(--shadow)}
-.start-btn:disabled{background:var(--line);color:var(--muted2);cursor:not-allowed;box-shadow:none;transform:none}
-.start-btn:not(:disabled):hover{background:#000;transform:translateY(-1px);box-shadow:var(--shadow2)}
-.start-btn:not(:disabled):active{transform:translateY(0px) scale(0.99)}
-[data-theme="dark"] .start-btn:not(:disabled):hover{background:#fff;color:#000}
-.hint{font-size:12px;color:var(--muted);margin-top:16px;text-align:center;line-height:1.5}
-.hint kbd{font-family:inherit;font-size:11px;padding:2px 6px;background:var(--bg2);border:1px solid var(--line);border-radius:6px;color:var(--muted)}
-
-.timer-screen .avoiding{font-size:14px;color:var(--muted);line-height:1.5;margin-bottom:6px;letter-spacing:0.01em}
-.timer-screen .avoiding b{color:var(--text);font-weight:700;background:var(--bg2);padding:2px 8px;border-radius:6px;border:1px solid var(--line)}
-.timer{font-size:clamp(52px,16vw,88px);font-weight:900;letter-spacing:-0.05em;line-height:0.9;font-variant-numeric:tabular-nums;color:var(--text);margin:14px 0 10px 0;transition:color 0.3s,transform 0.15s}
-.timer.tick{transform:scale(1.015)}
+.char-row{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
+.char-count{font-size:11px;color:var(--muted2)}
+.start-btn{margin-top:22px;width:100%;font-size:18px;font-weight:800;padding:20px 22px;background:var(--red);color:#fff;border:none;border-radius:14px;cursor:pointer;transition:all 0.22s;box-shadow:0 8px 24px rgba(225,29,72,0.28)}
+.start-btn:disabled{background:var(--line);color:var(--muted2);cursor:not-allowed;box-shadow:none}
+.start-btn:not(:disabled):hover{background:var(--red2);transform:translateY(-2px);box-shadow:0 14px 36px rgba(225,29,72,0.38)}
+.timer-screen .avoiding{font-size:15px;color:var(--muted);line-height:1.5;margin-bottom:6px}
+.timer-screen .avoiding b{color:var(--text);font-weight:750;background:var(--bg2);padding:3px 10px;border-radius:8px;border:1px solid var(--line);display:inline-block;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;vertical-align:bottom}
+.timer{font-size:clamp(56px,18vw,92px);font-weight:900;letter-spacing:-0.06em;line-height:0.85;font-variant-numeric:tabular-nums;margin:16px 0 12px 0;transition:color 0.3s,transform 0.12s}
+.timer.tick{transform:scale(1.02)}
 .timer.red{color:var(--red)}
-.shame{font-size:15px;line-height:1.45;color:var(--muted);min-height:44px;margin-top:14px;max-width:34ch;transition:all 0.2s}
+.shame{font-size:16px;line-height:1.45;color:var(--muted);min-height:44px;margin-top:14px;max-width:36ch}
 .shame.pulse{animation:pulse 0.6s ease}
-@keyframes pulse{0%{opacity:1;transform:translateY(0)}25%{opacity:0.5;transform:translateY(2px)}100%{opacity:1;transform:translateY(0)}}
-.stop-btn{margin-top:28px;width:100%;font-size:18px;font-weight:750;padding:20px 22px;background:var(--red);color:#fff;border:none;border-radius:var(--radius);cursor:pointer;letter-spacing:-0.01em;transition:all 0.2s;box-shadow:0 8px 24px rgba(225,29,72,0.25)}
-.stop-btn:hover{background:var(--red2);transform:translateY(-1px);box-shadow:0 12px 32px rgba(225,29,72,0.35)}
-.stop-btn:active{transform:translateY(0px) scale(0.99)}
+@keyframes pulse{0%{opacity:1;transform:translateY(0)}30%{opacity:0.45;transform:translateY(2px)}100%{opacity:1;transform:translateY(0)}}
+.stop-btn{margin-top:28px;width:100%;font-size:18px;font-weight:800;padding:20px 22px;background:var(--text);color:var(--bg);border:none;border-radius:14px;cursor:pointer;transition:all 0.22s}
+.stop-btn:hover{transform:translateY(-2px)}
 .secondary-actions{margin-top:14px;display:flex;gap:10px}
 .small-btn{flex:1;font-size:13px;font-weight:600;padding:12px 14px;background:var(--bg2);border:1px solid var(--line);border-radius:10px;cursor:pointer;color:var(--muted);transition:all 0.18s}
-.small-btn:hover{border-color:var(--text);color:var(--text);background:var(--bg3);transform:translateY(-1px)}
-.small-btn:active{transform:translateY(0)}
-
-.victory-screen .victory-kicker{font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.small-btn:hover{border-color:var(--text);color:var(--text);background:var(--bg3)}
+.victory-kicker{font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:10px}
 .victory-kicker::after{content:'';flex:1;height:1px;background:var(--line);margin-left:8px}
-.final-time{font-size:clamp(48px,14vw,72px);font-weight:900;letter-spacing:-0.05em;line-height:0.9;font-variant-numeric:tabular-nums;color:var(--red);margin-bottom:14px}
+.final-time{font-size:clamp(52px,14vw,84px);font-weight:900;letter-spacing:-0.06em;line-height:0.85;font-variant-numeric:tabular-nums;color:var(--red);margin-bottom:14px}
 .victory-task{font-size:14px;color:var(--muted);margin-bottom:8px;line-height:1.5}
-.victory-task b{color:var(--text);background:var(--bg2);padding:2px 8px;border-radius:6px;border:1px solid var(--line);font-weight:650}
-.victory-msg{font-size:19px;line-height:1.35;font-weight:700;color:var(--text);margin-bottom:28px;max-width:30ch;letter-spacing:-0.01em}
+.victory-task b{color:var(--text);background:var(--bg2);padding:2px 8px;border-radius:6px;border:1px solid var(--line);font-weight:700}
+.victory-msg{font-size:20px;line-height:1.35;font-weight:750;margin-bottom:28px;max-width:32ch}
 .victory-actions{display:flex;flex-direction:column;gap:10px}
 .btn-row{display:flex;gap:10px}
-.primary-outline{width:100%;font-size:16px;font-weight:700;padding:16px 20px;background:var(--bg3);border:1.5px solid var(--text);border-radius:12px;cursor:pointer;color:var(--text);transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px}
-.primary-outline:hover{background:var(--text);color:var(--bg);transform:translateY(-1px)}
-.primary-outline:active{transform:translateY(0)}
-
-.history{margin-top:36px;padding-top:26px;border-top:1px solid var(--line)}
+.primary-outline{width:100%;font-size:16px;font-weight:700;padding:16px 20px;background:var(--bg3);border:1.5px solid var(--text);border-radius:12px;cursor:pointer;color:var(--text);display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.2s}
+.primary-outline:hover{background:var(--text);color:var(--bg)}
+.history{margin-top:40px;padding:24px 20px 0 20px;border-top:1px solid var(--line);max-width:720px;margin-left:auto;margin-right:auto;width:100%}
 .history-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
 .history-title{font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);font-weight:700}
-.clear-btn{font-size:11px;font-weight:600;letter-spacing:0.03em;padding:7px 12px;background:transparent;border:1px solid var(--line);border-radius:8px;cursor:pointer;color:var(--muted);transition:all 0.18s}
+.clear-btn{font-size:11px;font-weight:600;padding:7px 12px;background:transparent;border:1px solid var(--line);border-radius:8px;cursor:pointer;color:var(--muted)}
 .clear-btn:hover{border-color:var(--red);color:var(--red);background:var(--redbg)}
 .history-list{display:flex;flex-direction:column;gap:8px}
-.history-item{display:flex;justify-content:space-between;align-items:center;padding:13px 14px;background:var(--bg2);border:1px solid var(--line);border-radius:12px;font-size:13px;line-height:1.3;transition:all 0.18s}
-.history-item:hover{border-color:var(--line2);transform:translateY(-1px);box-shadow:var(--shadow)}
+.history-item{display:flex;justify-content:space-between;align-items:center;padding:13px 14px;background:var(--bg2);border:1px solid var(--line);border-radius:12px;font-size:13px}
 .history-item .left{flex:1;min-width:0;margin-right:12px}
-.history-item .task{font-weight:650;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.history-item .meta{font-size:11px;color:var(--muted);margin-top:3px}
-.history-item .dur{font-variant-numeric:tabular-nums;font-weight:750;color:var(--text);white-space:nowrap;background:var(--bg3);padding:4px 8px;border-radius:6px;border:1px solid var(--line);font-size:12px}
+.history-item .task{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.history-item .meta{font-size:11px;color:var(--muted);margin-top:3px;display:flex;gap:8px}
+.history-item .dur{font-variant-numeric:tabular-nums;font-weight:800;background:var(--bg3);padding:5px 9px;border-radius:7px;border:1px solid var(--line);font-size:12px}
 .empty-history{font-size:13px;color:var(--muted);padding:14px 0;line-height:1.5}
 .totals{margin-top:14px;font-size:11px;color:var(--muted);display:flex;gap:16px;flex-wrap:wrap}
 .totals b{color:var(--text)}
-
-footer{margin-top:44px;padding-top:18px;border-top:1px solid var(--line);font-size:11px;color:var(--muted2);text-align:center;letter-spacing:0.02em}
+.leaderboard{margin-top:28px;padding:20px;border:1px solid var(--line);border-radius:14px;background:var(--bg2)}
+.leaderboard-title{font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.lb-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);font-size:13px}
+.lb-item:last-child{border-bottom:none}
+.lb-rank{width:26px;height:26px;border-radius:50%;background:var(--bg3);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:var(--muted)}
+.lb-rank.gold{background:var(--red);color:#fff;border-color:var(--red)}
+.lb-info{flex:1;min-width:0}
+.lb-user{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lb-task{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lb-time{font-variant-numeric:tabular-nums;font-weight:800;color:var(--red)}
+footer{margin-top:44px;padding:18px 20px;border-top:1px solid var(--line);font-size:11px;color:var(--muted2);text-align:center}
 footer a{color:var(--muted);text-decoration:none;border-bottom:1px solid var(--line)}
-footer a:hover{color:var(--text);border-color:var(--text)}
-
-.modal{position:fixed;inset:0;background:rgba(0,0,0,0.45);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);display:none;align-items:center;justify-content:center;padding:20px;z-index:50;opacity:0;transition:opacity 0.25s}
+.blink-overlay{position:fixed;inset:0;background:var(--redblink);pointer-events:none;opacity:0;z-index:40;transition:opacity 0.15s}
+.blink-overlay.show{opacity:1;animation:blinkFlash 0.8s ease}
+@keyframes blinkFlash{0%{opacity:0}15%{opacity:1}35%{opacity:0.6}60%{opacity:1}100%{opacity:0}}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,0.45);backdrop-filter:blur(14px);display:none;align-items:center;justify-content:center;padding:20px;z-index:50;opacity:0;transition:opacity 0.25s}
 .modal.show{display:flex;opacity:1}
-.card-preview{background:var(--bg3);border-radius:20px;padding:18px;max-width:380px;width:100%;box-shadow:0 24px 80px rgba(0,0,0,0.2);transform:translateY(12px) scale(0.98);transition:transform 0.35s cubic-bezier(0.16,1,0.3,1);border:1px solid var(--line)}
+.card-preview{background:var(--bg3);border-radius:20px;padding:18px;max-width:400px;width:100%;box-shadow:0 24px 80px rgba(0,0,0,0.25);transform:translateY(16px) scale(0.97);transition:transform 0.4s cubic-bezier(0.16,1,0.3,1);border:1px solid var(--line)}
 .modal.show .card-preview{transform:translateY(0) scale(1)}
 .card-preview img{width:100%;border-radius:12px;display:block;background:var(--bg2);aspect-ratio:1}
 .card-actions{margin-top:14px;display:flex;gap:10px}
 .card-actions button{flex:1}
-
-.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-
-@media(max-width:640px){
-.app{padding:16px 14px 32px 14px}
-.task-input{font-size:17px;padding:16px 16px}
-.timer{font-size:clamp(48px,18vw,64px)}
-.secondary-actions{flex-direction:column}
-.btn-row{flex-direction:column}
-.top{padding:12px 2px 10px 2px}
-}
 @media(min-width:900px){
-.app{max-width:720px;padding:28px 24px 48px 24px}
-.main{padding:32px 0}
+.top{padding:20px 32px}
+.main{max-width:100%;padding:32px 32px;min-height:calc(100vh - 140px)}
+.history{max-width:100%;padding:32px 32px 0 32px}
+.timer{font-size:clamp(96px,10vw,160px)}
 }
 </style>
 </head>
 <body>
+<div class="blink-overlay" id="blinkOverlay"></div>
 <div class="app">
   <div class="top">
     <div class="logo"><b>PROCRASTINATION</b> TIMER</div>
     <div class="top-right">
-      <div class="total-label" id="totalWastedLabel"></div>
-      <button class="theme-btn" id="themeBtn" aria-label="Toggle theme">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></svg>
-      </button>
+      <div class="pill" id="userCountPill">0 users</div>
+      <div class="pill red" id="liveCountPill" style="display:none">live</div>
+      <div class="pill" id="totalWastedLabel"></div>
+      <button class="theme-btn" id="themeBtn" aria-label="Toggle theme">☀</button>
     </div>
   </div>
 
   <div class="main">
     <div class="screen landing active" id="landingScreen">
-      <div class="eyebrow">Glymph Lab - Tool 02</div>
-      <div class="label">What were you supposed to be doing?</div>
-      <div class="input-wrap">
+      <div class="label">What were you supposed to be doing? And who are you?</div>
+      <div class="input-group">
+        <label class="input-label">Username - must be unique globally</label>
+        <input id="usernameInput" class="task-input" type="text" placeholder="e.g. yash, procrastinator99" maxlength="20" autocomplete="off" style="font-size:17px">
+        <div style="font-size:11px;color:var(--muted);margin-top:6px" id="usernameStatus"></div>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Task you are avoiding</label>
         <input id="taskInput" class="task-input" type="text" placeholder="e.g. finish the report, go to gym, call mom" maxlength="80" autocomplete="off" autofocus>
       </div>
       <div class="char-row">
@@ -168,11 +140,11 @@ footer a:hover{color:var(--text);border-color:var(--text)}
         <div class="char-count" id="charCount">0 / 80</div>
       </div>
       <button id="startBtn" class="start-btn" disabled>Start the shame</button>
-      <div class="hint">Press <kbd>Enter</kbd> to start. Timer runs even if you switch tabs.</div>
+      <div class="hint">Beep and red blink every hour. Global leaderboard via Supabase.</div>
     </div>
 
     <div class="screen timer-screen" id="timerScreen">
-      <div class="avoiding">You have been avoiding <b id="taskDisplay">something</b> for</div>
+      <div class="avoiding"><span id="userDisplay"></span> has been avoiding <b id="taskDisplay">something</b> for</div>
       <div id="timer" class="timer">00:00:00</div>
       <div id="shameMsg" class="shame">Just getting started huh.</div>
       <button id="stopBtn" class="stop-btn">Okay I will do it</button>
@@ -185,13 +157,10 @@ footer a:hover{color:var(--text);border-color:var(--text)}
     <div class="screen victory-screen" id="victoryScreen">
       <div class="victory-kicker">Total time wasted</div>
       <div id="finalTime" class="final-time">00:12:34</div>
-      <div class="victory-task">You avoided <b id="finalTask">something</b></div>
+      <div class="victory-task"><span id="finalUser"></span> avoided <b id="finalTask">something</b></div>
       <div id="victoryMsg" class="victory-msg">Better late than never. Barely.</div>
       <div class="victory-actions">
-        <button id="screenshotBtn" class="primary-outline">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
-          Screenshot this
-        </button>
+        <button id="screenshotBtn" class="primary-outline">Screenshot this</button>
         <div class="btn-row">
           <button id="shareTextBtn" class="small-btn">Copy share text</button>
           <button id="restartBtn" class="small-btn">Start another</button>
@@ -202,14 +171,19 @@ footer a:hover{color:var(--text);border-color:var(--text)}
 
   <div class="history" id="historySection">
     <div class="history-head">
-      <div class="history-title">Past crimes</div>
-      <button id="clearHistoryBtn" class="clear-btn">Clear history</button>
+      <div class="history-title">Past crimes - local</div>
+      <button id="clearHistoryBtn" class="clear-btn">Clear local</button>
     </div>
     <div id="historyList" class="history-list"></div>
     <div id="totals" class="totals"></div>
+
+    <div class="leaderboard" id="leaderboardSection">
+      <div class="leaderboard-title">Global Leaderboard - Supabase - longest procrastination</div>
+      <div id="leaderboardList"></div>
+    </div>
   </div>
 
-  <footer>Built by Glymph Studio - <a href="http://glymph.vercel.app" target="_blank" rel="noopener">glymph.vercel.app</a></footer>
+  <footer>Built by Glymph Studio - <a href="http://glymph.vercel.app" target="_blank">glymph.vercel.app</a></footer>
 </div>
 
 <div class="modal" id="cardModal">
@@ -225,13 +199,27 @@ footer a:hover{color:var(--text);border-color:var(--text)}
 <canvas id="cardCanvas" width="1080" height="1080" style="display:none"></canvas>
 
 <script>
+// ========= SUPABASE CONFIG - REPLACE THESE =========
+const SUPABASE_URL = 'https://YOUR_PROJECT_ID.supabase.co';
+const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY_HERE';
+// ===================================================
+
+let supabaseClient = null;
+try{
+  if(SUPABASE_URL.includes('YOUR_PROJECT')===false){
+    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  }
+}catch(e){ console.log('Supabase not configured, using local only', e); }
+
 const $ = id => document.getElementById(id);
 const taskInput = $('taskInput');
+const usernameInput = $('usernameInput');
 const startBtn = $('startBtn');
 const landingScreen = $('landingScreen');
 const timerScreen = $('timerScreen');
 const victoryScreen = $('victoryScreen');
 const taskDisplay = $('taskDisplay');
+const userDisplay = $('userDisplay');
 const timerEl = $('timer');
 const shameMsg = $('shameMsg');
 const stopBtn = $('stopBtn');
@@ -239,6 +227,7 @@ const cancelBtn = $('cancelBtn');
 const copyTaskBtn = $('copyTaskBtn');
 const finalTime = $('finalTime');
 const finalTask = $('finalTask');
+const finalUser = $('finalUser');
 const victoryMsg = $('victoryMsg');
 const screenshotBtn = $('screenshotBtn');
 const restartBtn = $('restartBtn');
@@ -254,14 +243,21 @@ const downloadCardBtn = $('downloadCardBtn');
 const closeCardBtn = $('closeCardBtn');
 const cardCanvas = $('cardCanvas');
 const themeBtn = $('themeBtn');
+const userCountPill = $('userCountPill');
+const liveCountPill = $('liveCountPill');
+const blinkOverlay = $('blinkOverlay');
+const leaderboardList = $('leaderboardList');
+const usernameStatus = $('usernameStatus');
 
 let startTime = null;
 let timerInterval = null;
 let currentTask = '';
+let currentUser = '';
 let currentShame = '';
 let tabHiddenCount = 0;
 let lastShameIndex = -1;
 let lastSession = null;
+let audioCtx = null;
 
 const SHAME = [
   { max: 120, text: "Just getting started huh." },
@@ -272,7 +268,6 @@ const SHAME = [
   { max: 7200, text: "Impressive dedication to doing nothing." },
   { max: Infinity, text: "At this point just reschedule it and move on with your life." }
 ];
-
 const VICTORY = [
   "Better late than never. Barely.",
   "Only took you {time}. Personal best?",
@@ -319,22 +314,98 @@ function getVictory(sec){
   const t = VICTORY[Math.floor(Math.random()*VICTORY.length)];
   return t.replace('{time}', fmtHuman(sec));
 }
+
+// Local storage helpers
 function loadHistory(){
+  try{ const raw = localStorage.getItem('procrastination_history'); return raw ? JSON.parse(raw) : []; }catch{ return []; }
+}
+function saveHistory(arr){ try{ localStorage.setItem('procrastination_history', JSON.stringify(arr)); }catch{} }
+function loadUsers(){
+  try{ const raw = localStorage.getItem('procrastination_users'); return raw ? JSON.parse(raw) : []; }catch{ return []; }
+}
+function saveUsers(arr){ try{ localStorage.setItem('procrastination_users', JSON.stringify(arr)); }catch{} }
+
+// Supabase helpers
+async function supabaseAddUser(username){
+  if(!supabaseClient) return true;
   try{
-    const raw = localStorage.getItem('procrastination_history');
-    return raw ? JSON.parse(raw) : [];
-  }catch{ return []; }
+    const { data, error } = await supabaseClient.from('users').insert([{ username }]).select();
+    if(error){
+      if(error.code==='23505'){
+        usernameStatus.textContent = 'Username taken globally, but you can still use it if it is yours (first come first served).';
+        return true;
+      }
+      console.log('add user error', error);
+      return false;
+    }
+    return true;
+  }catch(e){ console.log(e); return false; }
 }
-function saveHistory(arr){
-  try{ localStorage.setItem('procrastination_history', JSON.stringify(arr)); }catch{}
+async function supabaseGetUserCount(){
+  if(!supabaseClient) return null;
+  try{
+    const { count, error } = await supabaseClient.from('users').select('*', {count:'exact', head:true});
+    if(error) throw error;
+    return count;
+  }catch(e){ console.log(e); return null; }
 }
-function addToHistory(task, durSec){
+async function supabaseAddSession(username, task, durationSec){
+  if(!supabaseClient) return;
+  try{
+    const { error } = await supabaseClient.from('sessions').insert([{ username, task, duration_sec: durationSec }]);
+    if(error) console.log('add session error', error);
+  }catch(e){ console.log(e); }
+}
+async function supabaseGetLeaderboard(){
+  if(!supabaseClient) return [];
+  try{
+    const { data, error } = await supabaseClient.from('sessions').select('*').order('duration_sec', {ascending:false}).limit(10);
+    if(error) throw error;
+    return data || [];
+  }catch(e){ console.log(e); return []; }
+}
+async function supabaseCheckUsername(username){
+  if(!supabaseClient) return {available:true};
+  try{
+    const { data, error } = await supabaseClient.from('users').select('username').eq('username', username).limit(1);
+    if(error) throw error;
+    return {available: data.length===0, exists: data.length>0};
+  }catch(e){ return {available:true}; }
+}
+
+function addUserLocal(username){
+  const users = loadUsers();
+  if(!users.includes(username)){
+    users.push(username);
+    saveUsers(users);
+  }
+  updateUserCountLocal();
+}
+function updateUserCountLocal(){
+  const users = loadUsers();
+  userCountPill.textContent = `${users.length} users (local)`;
+}
+async function updateUserCount(){
+  updateUserCountLocal();
+  if(supabaseClient){
+    const globalCount = await supabaseGetUserCount();
+    if(globalCount!==null){
+      userCountPill.textContent = `${globalCount} users (global)`;
+    }
+  }
+}
+
+function addToHistory(task, durSec, username){
   const hist = loadHistory();
-  hist.unshift({ task, durationSec: durSec, ts: Date.now() });
-  const trimmed = hist.slice(0,20);
-  saveHistory(trimmed);
-  lastSession = { task, durationSec: durSec };
+  hist.unshift({ task, durationSec: durSec, ts: Date.now(), username: username || 'anon' });
+  saveHistory(hist.slice(0,100));
+  lastSession = { task, durationSec: durSec, username };
   renderHistory();
+  renderLeaderboard();
+  if(supabaseClient){
+    supabaseAddSession(username, task, durSec);
+    supabaseAddUser(username);
+  }
 }
 function renderHistory(){
   const hist = loadHistory();
@@ -350,7 +421,7 @@ function renderHistory(){
     const div = document.createElement('div');
     div.className = 'history-item';
     const ago = fmtRel(item.ts);
-    div.innerHTML = `<div class="left"><div class="task">${esc(item.task)}</div><div class="meta">${ago}</div></div><div class="dur">${fmtHuman(item.durationSec)}</div>`;
+    div.innerHTML = `<div class="left"><div class="task">${esc(item.task)}</div><div class="meta"><span>${esc(item.username||'anon')}</span><span>${ago}</span></div></div><div class="dur">${fmtHuman(item.durationSec)}</div>`;
     historyList.appendChild(div);
   });
   const totalSec = hist.reduce((a,b)=>a+b.durationSec,0);
@@ -358,6 +429,41 @@ function renderHistory(){
   const longest = hist.length ? Math.max(...hist.map(h=>h.durationSec)) : 0;
   totalsEl.innerHTML = `<span><b>Total</b> ${fmtHuman(totalSec)} wasted</span><span><b>Avg</b> ${fmtHuman(avg)}</span><span><b>Longest</b> ${fmtHuman(longest)}</span><span><b>Sessions</b> ${hist.length}</span>`;
   totalWastedLabel.textContent = hist.length ? `Total wasted: ${fmtHumanShort(totalSec)}` : '';
+}
+async function renderLeaderboard(){
+  // local fallback
+  const hist = loadHistory();
+  if(!supabaseClient){
+    if(hist.length===0){
+      leaderboardList.innerHTML = '<div class="empty-history">No leaderboard yet. Be the first to waste time. (Local only, add Supabase for global)</div>';
+      return;
+    }
+    const sorted = [...hist].sort((a,b)=>b.durationSec - a.durationSec).slice(0,5);
+    leaderboardList.innerHTML = '';
+    sorted.forEach((item, idx)=>{
+      const div = document.createElement('div');
+      div.className = 'lb-item';
+      const rankClass = idx===0 ? 'lb-rank gold' : 'lb-rank';
+      div.innerHTML = `<div class="${rankClass}">${idx+1}</div><div class="lb-info"><div class="lb-user">${esc(item.username||'anon')}</div><div class="lb-task">${esc(item.task)}</div></div><div class="lb-time">${fmtHuman(item.durationSec)}</div>`;
+      leaderboardList.appendChild(div);
+    });
+    return;
+  }
+  // global
+  leaderboardList.innerHTML = '<div class="empty-history">Loading global leaderboard...</div>';
+  const data = await supabaseGetLeaderboard();
+  if(data.length===0){
+    leaderboardList.innerHTML = '<div class="empty-history">No global leaderboard yet. Be the first.</div>';
+    return;
+  }
+  leaderboardList.innerHTML = '';
+  data.slice(0,10).forEach((item, idx)=>{
+    const div = document.createElement('div');
+    div.className = 'lb-item';
+    const rankClass = idx===0 ? 'lb-rank gold' : 'lb-rank';
+    div.innerHTML = `<div class="${rankClass}">${idx+1}</div><div class="lb-info"><div class="lb-user">${esc(item.username)}</div><div class="lb-task">${esc(item.task)}</div></div><div class="lb-time">${fmtHuman(item.duration_sec)}</div>`;
+    leaderboardList.appendChild(div);
+  });
 }
 function fmtRel(ts){
   const diff = Date.now() - ts;
@@ -376,37 +482,75 @@ function showScreen(name){
   landingScreen.classList.remove('active');
   timerScreen.classList.remove('active');
   victoryScreen.classList.remove('active');
-  setTimeout(()=>{
-    if(name==='landing') landingScreen.classList.add('active');
-    if(name==='timer') timerScreen.classList.add('active');
-    if(name==='victory') victoryScreen.classList.add('active');
-  }, 60);
   if(name==='landing'){
     landingScreen.classList.add('active');
+  }else{
+    setTimeout(()=>{
+      if(name==='timer') timerScreen.classList.add('active');
+      if(name==='victory') victoryScreen.classList.add('active');
+    }, 80);
   }
 }
 
-function startTimer(){
-  const raw = taskInput.value.trim();
-  currentTask = raw || 'something important';
+async function validateInputs(){
+  const taskLen = taskInput.value.trim().length;
+  const userRaw = usernameInput.value.trim();
+  const userValid = /^[a-zA-Z0-9_]{2,20}$/.test(userRaw);
+  charCount.textContent = `${taskLen} / 80`;
+  startBtn.disabled = !(taskLen>=2 && userValid);
+  if(userRaw && !userValid){
+    usernameInput.style.borderColor = 'var(--red)';
+    usernameStatus.textContent = 'Use 2-20 letters, numbers, underscore only.';
+  }else{
+    usernameInput.style.borderColor = '';
+    if(userRaw && supabaseClient){
+      const check = await supabaseCheckUsername(userRaw);
+      if(!check.available){
+        usernameStatus.textContent = 'Username taken globally - you can still use it if it is yours, first come first served.';
+        usernameStatus.style.color = 'var(--red)';
+      }else{
+        usernameStatus.textContent = 'Username available globally.';
+        usernameStatus.style.color = 'var(--muted)';
+      }
+    }else{
+      usernameStatus.textContent = userRaw ? 'Username looks good.' : '';
+    }
+  }
+}
+
+async function startTimer(){
+  const rawTask = taskInput.value.trim();
+  const rawUser = usernameInput.value.trim();
+  if(!/^[a-zA-Z0-9_]{2,20}$/.test(rawUser)){
+    usernameInput.focus();
+    return;
+  }
+  currentTask = rawTask || 'something important';
+  currentUser = rawUser;
+  addUserLocal(currentUser);
+  if(supabaseClient) await supabaseAddUser(currentUser);
+  try{ localStorage.setItem('procrastination_current_user', currentUser); }catch{}
   startTime = Date.now();
   tabHiddenCount = 0;
   lastShameIndex = -1;
   taskDisplay.textContent = currentTask;
+  userDisplay.textContent = currentUser;
   timerEl.textContent = '00:00:00';
   timerEl.classList.remove('red');
-  currentShame = '';
   shameMsg.textContent = SHAME[0].text;
-  try{ localStorage.setItem('active_procrastination', JSON.stringify({task: currentTask, start: startTime})); }catch{}
+  try{ localStorage.setItem('active_procrastination', JSON.stringify({task: currentTask, user: currentUser, start: startTime})); }catch{}
   showScreen('timer');
+  liveCountPill.style.display = 'inline-block';
   document.title = `Avoiding ${currentTask} - 00:00:00`;
   if(timerInterval) clearInterval(timerInterval);
   timerInterval = setInterval(tick, 250);
+  initAudio();
 }
 
 function tick(){
   if(!startTime) return;
   const elapsed = (Date.now() - startTime)/1000;
+  const elapsedInt = Math.floor(elapsed);
   const newText = fmtHMS(elapsed);
   if(timerEl.textContent !== newText){
     timerEl.textContent = newText;
@@ -427,32 +571,62 @@ function tick(){
   if(tabHiddenCount>2 && elapsed>300 && index<3){
     shameMsg.textContent = "Left to procrastinate somewhere else huh.";
   }
+  if(elapsedInt>0 && elapsedInt % 3600 === 0 && Math.floor(elapsed*4)%4===0){
+    triggerHourlyCheck();
+  }
 }
-
+function initAudio(){
+  try{ if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }catch{}
+}
+function beep(){
+  if(!audioCtx) return;
+  try{
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = 'sine';
+    o.frequency.value = 880;
+    o.connect(g);
+    g.connect(audioCtx.destination);
+    g.gain.setValueAtTime(0, audioCtx.currentTime);
+    g.gain.linearRampToValueAtTime(0.18, audioCtx.currentTime+0.02);
+    g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.6);
+    o.start();
+    o.stop(audioCtx.currentTime+0.6);
+  }catch{}
+}
+function triggerHourlyCheck(){
+  blinkOverlay.classList.remove('show');
+  void blinkOverlay.offsetWidth;
+  blinkOverlay.classList.add('show');
+  beep();
+  setTimeout(()=>blinkOverlay.classList.remove('show'), 900);
+  if(navigator.vibrate) navigator.vibrate([120,80,120]);
+}
 function stopTimer(){
   if(!startTime) return;
   const elapsedSec = Math.floor((Date.now() - startTime)/1000);
   if(timerInterval){ clearInterval(timerInterval); timerInterval=null; }
   try{ localStorage.removeItem('active_procrastination'); }catch{}
+  liveCountPill.style.display = 'none';
   document.title = 'Procrastination Timer - Glymph Studio';
   finalTime.textContent = fmtHMS(elapsedSec);
   finalTask.textContent = currentTask;
-  const msg = getVictory(elapsedSec);
-  victoryMsg.textContent = msg;
+  finalUser.textContent = currentUser;
+  finalTime.textContent = fmtHMS(elapsedSec);
+  victoryMsg.textContent = getVictory(elapsedSec);
   showScreen('victory');
-  addToHistory(currentTask, elapsedSec);
+  addToHistory(currentTask, elapsedSec, currentUser);
 }
-
 function cancelTimer(){
   if(timerInterval){ clearInterval(timerInterval); timerInterval=null; }
   startTime = null;
   try{ localStorage.removeItem('active_procrastination'); }catch{}
+  liveCountPill.style.display = 'none';
   document.title = 'Procrastination Timer - Glymph Studio';
   showScreen('landing');
   taskInput.focus();
 }
-
-function drawCard(task, durationSec, shame){
+function drawCard(task, durationSec, shame, username){
   const ctx = cardCanvas.getContext('2d');
   const W = cardCanvas.width;
   const H = cardCanvas.height;
@@ -460,8 +634,7 @@ function drawCard(task, durationSec, shame){
   const bg = isDark ? '#0a0a0a' : '#ffffff';
   const bg2 = isDark ? '#171717' : '#f6f5f3';
   const text = isDark ? '#f5f3f0' : '#111111';
-  const muted = isDark ? '#8a8a8a' : '#8a8a8a';
-
+  const muted = '#8a8a8a';
   ctx.fillStyle = bg;
   ctx.fillRect(0,0,W,H);
   ctx.fillStyle = '#e11d48';
@@ -469,33 +642,30 @@ function drawCard(task, durationSec, shame){
   ctx.fillStyle = bg2;
   ctx.fillRect(0,14,W,180);
   ctx.fillStyle = muted;
-  ctx.font = '600 24px -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial';
+  ctx.font = '700 24px -apple-system, BlinkMacSystemFont, Segoe UI, Roboto';
   ctx.fillText('PROCRASTINATION TIMER', 64, 110);
   let y = 200;
   ctx.fillStyle = muted;
-  ctx.font = '500 28px -apple-system, BlinkMacSystemFont, Segoe UI, Roboto';
-  ctx.fillText('You avoided', 64, y);
-  y+=50;
+  ctx.font = '500 26px -apple-system, BlinkMacSystemFont, Segoe UI';
+  ctx.fillText(`${username} avoided`, 64, y);
+  y+=54;
   ctx.fillStyle = text;
-  ctx.font = '800 54px -apple-system, BlinkMacSystemFont, Segoe UI, Roboto';
+  ctx.font = '800 54px -apple-system, BlinkMacSystemFont, Segoe UI';
   const taskLines = wrapLines(ctx, task, 64, W-128, 54);
-  taskLines.slice(0,2).forEach(line=>{
-    ctx.fillText(line, 64, y);
-    y+=64;
-  });
-  y+=16;
+  taskLines.slice(0,2).forEach(line=>{ ctx.fillText(line, 64, y); y+=64; });
+  y+=18;
   ctx.fillStyle = muted;
-  ctx.font = '500 28px -apple-system, BlinkMacSystemFont, Segoe UI, Roboto';
+  ctx.font = '500 26px -apple-system, BlinkMacSystemFont, Segoe UI';
   ctx.fillText('for', 64, y);
   y+=86;
   ctx.fillStyle = '#e11d48';
-  ctx.font = '900 96px -apple-system, BlinkMacSystemFont, Segoe UI, Roboto';
+  ctx.font = '900 96px -apple-system, BlinkMacSystemFont, Segoe UI';
   ctx.fillText(fmtHMS(durationSec), 64, y);
   y+=54;
   ctx.fillStyle = text;
-  ctx.font = '600 28px -apple-system, BlinkMacSystemFont, Segoe UI, Roboto';
+  ctx.font = '600 26px -apple-system, BlinkMacSystemFont, Segoe UI';
   ctx.fillText(`(${fmtHuman(durationSec)} wasted)`, 64, y);
-  y+=88;
+  y+=90;
   ctx.fillStyle = bg2;
   const boxX=64, boxW=W-128, boxH=150, boxY=y;
   const r=18;
@@ -510,25 +680,22 @@ function drawCard(task, durationSec, shame){
   ctx.lineTo(boxX, boxY+r);
   ctx.quadraticCurveTo(boxX, boxY, boxX+r, boxY);
   ctx.fill();
-  ctx.fillStyle = '#555555';
-  if(isDark) ctx.fillStyle = '#aaaaaa';
-  ctx.font = '500 26px -apple-system, BlinkMacSystemFont, Segoe UI, Roboto';
+  ctx.fillStyle = isDark ? '#aaaaaa' : '#555555';
+  ctx.font = '500 26px -apple-system, BlinkMacSystemFont, Segoe UI';
   const shameLines = wrapLines(ctx, `"${shame}"`, boxX+28, boxW-56, 26);
   let sy = boxY+52;
   shameLines.slice(0,3).forEach(l=>{ ctx.fillText(l, boxX+28, sy); sy+=38; });
-  y = boxY+boxH+90;
   ctx.fillStyle = '#aaaaaa';
-  ctx.font = '600 22px -apple-system, BlinkMacSystemFont, Segoe UI, Roboto';
+  ctx.font = '600 22px -apple-system, BlinkMacSystemFont, Segoe UI';
   ctx.fillText('Built by Glymph Studio - glymph.vercel.app', 64, H-64);
   ctx.fillStyle = '#e11d48';
   ctx.beginPath();
   ctx.arc(64, H-118, 8, 0, Math.PI*2);
   ctx.fill();
   ctx.fillStyle = text;
-  ctx.font = '700 22px -apple-system, BlinkMacSystemFont, Segoe UI, Roboto';
+  ctx.font = '700 22px -apple-system, BlinkMacSystemFont, Segoe UI';
   ctx.fillText('procrastination timer', 84, H-112);
 }
-
 function wrapLines(ctx, text, x, maxW, fontSize){
   const words = String(text).split(' ');
   const lines = [];
@@ -546,39 +713,36 @@ function wrapLines(ctx, text, x, maxW, fontSize){
   if(line) lines.push(line);
   return lines;
 }
-
 function openCard(){
   const sec = lastSession ? lastSession.durationSec : (startTime ? Math.floor((Date.now()-startTime)/1000) : 0);
   const task = lastSession ? lastSession.task : currentTask || 'something';
+  const user = lastSession ? lastSession.username : currentUser || 'anon';
   const shame = currentShame || getShame(sec).text;
-  drawCard(task, sec, shame);
+  drawCard(task, sec, shame, user);
   const dataUrl = cardCanvas.toDataURL('image/png');
   cardImg.src = dataUrl;
   cardModal.classList.add('show');
 }
-
 function closeCard(){ cardModal.classList.remove('show'); }
-
 function downloadCard(){
   const a = document.createElement('a');
   a.download = `procrastination-${Date.now()}.png`;
   a.href = cardImg.src;
   a.click();
 }
-
 function copyShareText(){
   const hist = loadHistory();
   const last = hist[0];
   const sec = last ? last.durationSec : 0;
   const task = last ? last.task : currentTask;
-  const text = `I avoided "${task}" for ${fmtHuman(sec)}. ${last ? '' : victoryMsg.textContent} - procrastination timer by Glymph Studio https://glymph.vercel.app`;
+  const user = last ? last.username : currentUser;
+  const text = `${user} avoided "${task}" for ${fmtHuman(sec)}. - procrastination timer by Glymph Studio https://glymph.vercel.app`;
   navigator.clipboard.writeText(text).then(()=>{
     const orig = shareTextBtn.textContent;
     shareTextBtn.textContent = 'Copied';
     setTimeout(()=>shareTextBtn.textContent=orig,1200);
   });
 }
-
 function initTheme(){
   const saved = localStorage.getItem('procrastination_theme');
   const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -602,15 +766,10 @@ function toggleTheme(){
 }
 
 // events
-taskInput.addEventListener('input', ()=>{
-  const len = taskInput.value.length;
-  charCount.textContent = `${len} / 80`;
-  startBtn.disabled = len < 2;
-  if(len>=80) charCount.classList.add('warn'); else charCount.classList.remove('warn');
-});
-taskInput.addEventListener('keydown', e=>{
-  if(e.key==='Enter' && taskInput.value.trim().length>=2) startTimer();
-});
+usernameInput.addEventListener('input', validateInputs);
+taskInput.addEventListener('input', validateInputs);
+taskInput.addEventListener('keydown', e=>{ if(e.key==='Enter' && !startBtn.disabled) startTimer(); });
+usernameInput.addEventListener('keydown', e=>{ if(e.key==='Enter' && !startBtn.disabled) startTimer(); });
 startBtn.addEventListener('click', startTimer);
 stopBtn.addEventListener('click', stopTimer);
 cancelBtn.addEventListener('click', cancelTimer);
@@ -630,6 +789,7 @@ clearHistoryBtn.addEventListener('click', ()=>{
   if(confirm('Clear all past crimes?')){
     saveHistory([]);
     renderHistory();
+    renderLeaderboard();
   }
 });
 screenshotBtn.addEventListener('click', openCard);
@@ -638,15 +798,16 @@ downloadCardBtn.addEventListener('click', downloadCard);
 shareTextBtn.addEventListener('click', copyShareText);
 cardModal.addEventListener('click', e=>{ if(e.target===cardModal) closeCard(); });
 themeBtn.addEventListener('click', toggleTheme);
+document.addEventListener('visibilitychange', ()=>{ if(document.hidden && startTime) tabHiddenCount++; });
 
-document.addEventListener('visibilitychange', ()=>{
-  if(document.hidden && startTime) tabHiddenCount++;
-});
-
-(function init(){
+(async function init(){
   initTheme();
   renderHistory();
+  updateUserCount();
+  await renderLeaderboard();
   try{
+    const savedUser = localStorage.getItem('procrastination_current_user');
+    if(savedUser) usernameInput.value = savedUser;
     const raw = localStorage.getItem('active_procrastination');
     if(raw){
       const obj = JSON.parse(raw);
@@ -654,15 +815,19 @@ document.addEventListener('visibilitychange', ()=>{
         const elapsed = (Date.now() - obj.start)/1000;
         if(elapsed>0 && elapsed<86400*2){
           currentTask = obj.task;
+          currentUser = obj.user || savedUser || 'anon';
           startTime = obj.start;
           taskDisplay.textContent = currentTask;
+          userDisplay.textContent = currentUser;
           showScreen('timer');
+          liveCountPill.style.display = 'inline-block';
           timerInterval = setInterval(tick, 250);
           tick();
         }
       }
     }
   }catch{}
+  validateInputs();
 })();
 
 document.addEventListener('keydown', e=>{
