@@ -5,242 +5,243 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Procrastination Timer</title>
 <meta name="description" content="How long have you been avoiding it?">
-<meta name="author" content="Yash-Tripath1">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js">
- const SUPABASE_URL = 'https://evqsrwsyxgeskmbjsiud.supabase.co';
+  const SUPABASE_URL = 'https://evqsrwsyxgeskmbjsiud.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV2cXNyd3N5eGdlc2ttYmpzaXVkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwODIyMDAsImV4cCI6MjEwNTY1ODIwMH0.WUhawaRfLvb-NmgSZMB67lAvms0PiH2ZcKTYXjP-saQ';
-
 </script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
+html{scrollbar-width:none;-ms-overflow-style:none}
+html::-webkit-scrollbar{width:0;height:0;display:none}
 :root{
-  --bg:#fdfcfa;
-  --card:#ffffff;
-  --card2:#f7f5f2;
-  --text:#141413;
-  --muted:#9a9996;
-  --muted2:#c2c0bc;
-  --line:#efede8;
-  --line2:#e8e5df;
-  --red:#e11d48;
-  --red2:#be123c;
-  --redsoft:#fff1f2;
-  --shadow:0 2px 16px rgba(0,0,0,0.04);
-  --shadow2:0 16px 40px rgba(0,0,0,0.08);
-  --r:18px;
+  --bg:#0f0f0f;
+  --text:#ffffff;
+  --accent:#ff3333;
+  --muted:#555555;
+  --surface:#1a1a1a;
+  --line:#222222;
+  --line2:#333333;
+  --placeholder:#444444;
 }
-[data-theme="dark"]{
-  --bg:#0e0e0e;
-  --card:#161616;
-  --card2:#1e1e1e;
-  --text:#f2f0eb;
-  --muted:#8a8a8a;
-  --muted2:#4a4a4a;
-  --line:#232323;
-  --line2:#2a2a2a;
-  --red:#ff3b5c;
-  --red2:#e11d48;
-  --redsoft:#1e0e12;
-  --shadow:0 2px 16px rgba(0,0,0,0.3);
-  --shadow2:0 16px 40px rgba(0,0,0,0.5);
+html,body{background:var(--bg);color:var(--text);font-family:'Inter',-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;min-height:100vh;overflow-x:hidden}
+button,input{font-family:'Inter',sans-serif}
+input{appearance:none;-webkit-appearance:none;-moz-appearance:none;background:none;border:none;outline:none;border-radius:0}
+button{appearance:none;-webkit-appearance:none;border:none;background:none;cursor:pointer}
+.app{width:100%;min-height:100vh;display:flex;flex-direction:column}
+
+/* Screens - full viewport */
+.screen{display:none;min-height:100vh;width:100%;flex-direction:column}
+.screen.active{display:flex}
+.screen-inner{width:100%;max-width:640px;margin:0 auto;padding:24px 20px;display:flex;flex-direction:column;min-height:100vh;flex:1}
+@media(min-width:700px){
+  .screen-inner{padding:32px 24px;align-items:center}
+  .screen-inner > *{width:100%}
 }
-html,body{background:var(--bg);color:var(--text);font-family:ui-sans-system,-apple-system,BlinkMacSystemFont,Inter,Segoe UI,Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;min-height:100vh;transition:background 0.25s,color 0.25s}
-button{font-family:inherit}
-.wrap{max-width:640px;margin:0 auto;padding:28px 20px 48px 20px;min-height:100vh;display:flex;flex-direction:column}
-.nav{display:flex;justify-content:space-between;align-items:center;padding:4px 2px 22px 2px}
-.logo{font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);font-weight:700}
-.logo b{color:var(--text)}
-.nav-right{display:flex;align-items:center;gap:10px}
-.icon-btn{width:38px;height:38px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s}
-.icon-btn:hover{border-color:var(--text);color:var(--text);transform:translateY(-1px)}
-.pill{font-size:11px;font-weight:650;padding:7px 12px;border-radius:999px;background:var(--card);border:1px solid var(--line);color:var(--muted);letter-spacing:0.02em}
-.main{flex:1;display:flex;flex-direction:column;justify-content:center;padding:18px 0 28px 0}
-.screen{display:none}
-.screen.active{display:flex;flex-direction:column;animation:in 0.4s cubic-bezier(0.16,1,0.3,1)}
-@keyframes in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-.kicker{font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:18px}
-.title{font-size:15px;color:var(--muted);line-height:1.5;margin-bottom:22px}
-.title b{color:var(--text)}
-.field{margin-bottom:16px}
-.field label{font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:8px;display:block}
-.input{width:100%;font-size:18px;font-weight:600;line-height:1.3;padding:17px 16px;background:var(--card);border:1.5px solid var(--line);border-radius:14px;outline:none;color:var(--text);transition:all 0.2s;box-shadow:var(--shadow)}
-.input:focus{border-color:var(--text);box-shadow:var(--shadow2);transform:translateY(-1px)}
-.input::placeholder{color:var(--muted2);font-weight:500}
-.input.small{font-size:16px;padding:15px 16px}
-.help{font-size:11px;color:var(--muted2);margin-top:7px;min-height:14px;line-height:1.4}
-.help.error{color:var(--red)}
-.row{display:flex;justify-content:space-between;align-items:center;margin-top:10px}
-.count{font-size:11px;color:var(--muted2)}
-.btn{width:100%;font-size:17px;font-weight:800;letter-spacing:-0.01em;padding:18px 20px;border:none;border-radius:14px;cursor:pointer;transition:all 0.2s}
-.btn-red{background:var(--red);color:#fff;box-shadow:0 8px 24px rgba(225,29,72,0.28)}
-.btn-red:hover{background:var(--red2);transform:translateY(-1px);box-shadow:0 14px 32px rgba(225,29,72,0.36)}
-.btn-red:disabled{background:var(--line);color:var(--muted2);box-shadow:none;transform:none;cursor:not-allowed}
-.btn-dark{background:var(--text);color:var(--bg);box-shadow:var(--shadow)}
-.btn-dark:hover{transform:translateY(-1px);box-shadow:var(--shadow2)}
-.btn-light{background:var(--card);border:1.5px solid var(--text);color:var(--text)}
-.btn-light:hover{background:var(--text);color:var(--bg)}
-.btn:active{transform:translateY(0) scale(0.99)}
-.hint{font-size:12px;color:var(--muted);text-align:center;margin-top:16px;line-height:1.5}
-.timer-label{font-size:13px;color:var(--muted);margin-bottom:6px}
-.timer-label b{color:var(--text);background:var(--card2);border:1px solid var(--line);padding:3px 8px;border-radius:8px;font-weight:700}
-.timer{font-size:clamp(56px,15vw,84px);font-weight:900;letter-spacing:-0.06em;line-height:0.9;font-variant-numeric:tabular-nums;margin:10px 0;transition:transform 0.12s,color 0.2s}
+
+/* Landing */
+.top-label{font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:32px}
+.big-question{font-size:32px;font-weight:800;line-height:1.1;letter-spacing:-0.03em;color:var(--text);margin-bottom:40px;max-width:18ch}
+@media(min-width:700px){.big-question{font-size:36px;text-align:center;max-width:20ch;margin-left:auto;margin-right:auto}}
+.inputs{flex:1;display:flex;flex-direction:column;gap:8px}
+.field{position:relative;padding:18px 0 8px 0;border-bottom:1px solid var(--line2);transition:border-color 0.2s;background:var(--surface);margin-bottom:4px;padding-left:16px;padding-right:16px}
+.field:focus-within{border-bottom-color:var(--text)}
+.field label{font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);font-weight:600;display:block;margin-bottom:10px}
+.field input{width:100%;font-size:16px;font-weight:500;color:var(--text);background:transparent;padding:4px 0 6px 0}
+.field input::placeholder{color:var(--placeholder)}
+.field .help{font-size:11px;color:var(--muted);margin-top:8px;min-height:14px;line-height:1.3}
+.field .help.error{color:var(--accent)}
+.char-row{display:flex;justify-content:flex-end;margin-top:10px}
+.char-count{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.landing-bottom{margin-top:auto;padding-top:32px;display:flex;flex-direction:column;gap:16px}
+.btn{width:100%;height:56px;font-size:15px;font-weight:800;letter-spacing:-0.01em;text-transform:uppercase;display:flex;align-items:center;justify-content:center;transition:opacity 0.15s,transform 0.1s;border-radius:2px}
+.btn-red{background:var(--accent);color:#fff}
+.btn-white{background:#fff;color:#000}
+.btn-dark{background:var(--surface);color:var(--text);border:1px solid var(--line2)}
+.btn:hover{opacity:0.85}
+.btn:active{opacity:0.7;transform:scale(0.99)}
+.btn:disabled{background:var(--surface);color:var(--muted);opacity:1;cursor:not-allowed}
+.user-count{font-size:11px;color:var(--muted);text-align:center;letter-spacing:0.02em;padding:4px 0}
+
+/* Timer */
+.timer-screen .screen-inner{justify-content:space-between}
+.timer-top{padding-top:12px}
+.avoiding-label{font-size:14px;color:var(--muted);margin-bottom:12px;letter-spacing:0.01em}
+.avoiding-task{font-size:28px;font-weight:800;line-height:1.1;letter-spacing:-0.02em;color:var(--text);word-break:break-word;max-width:20ch}
+@media(min-width:700px){.avoiding-task{font-size:36px}}
+.timer-wrap{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding:24px 0}
+@media(min-width:700px){.timer-wrap{align-items:center}}
+.timer{font-size:80px;font-weight:900;letter-spacing:-0.06em;line-height:0.9;color:var(--accent);font-variant-numeric:tabular-nums;transition:transform 0.12s}
+@media(min-width:700px){.timer{font-size:96px;text-align:center}}
 .timer.tick{transform:scale(1.02)}
-.timer.red{color:var(--red)}
-.shame{font-size:15px;line-height:1.45;color:var(--muted);min-height:44px;margin-top:12px}
+.shame{font-size:15px;line-height:1.5;color:var(--muted);font-style:italic;margin-top:18px;max-width:34ch;min-height:48px}
 .shame.pulse{animation:pulse 0.6s ease}
-@keyframes pulse{0%{opacity:1;transform:translateY(0)}30%{opacity:0.5;transform:translateY(2px)}100%{opacity:1;transform:translateY(0)}}
-.actions{margin-top:26px;display:flex;flex-direction:column;gap:10px}
-.actions-row{display:flex;gap:10px}
-.mini{flex:1;font-size:13px;font-weight:600;padding:12px 14px;background:var(--card2);border:1px solid var(--line);border-radius:10px;cursor:pointer;color:var(--muted);transition:all 0.18s}
-.mini:hover{border-color:var(--text);color:var(--text);background:var(--card)}
+@keyframes pulse{0%{opacity:1}30%{opacity:0.4}100%{opacity:1}}
+.timer-bottom{padding-bottom:8px}
 
-.final-kicker{font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:12px}
-.final-time{font-size:clamp(48px,13vw,72px);font-weight:900;letter-spacing:-0.06em;line-height:0.9;color:var(--red);margin-bottom:12px;font-variant-numeric:tabular-nums}
-.final-task{font-size:13px;color:var(--muted);margin-bottom:6px}
-.final-task b{color:var(--text);background:var(--card2);border:1px solid var(--line);padding:2px 8px;border-radius:6px}
-.final-msg{font-size:20px;font-weight:750;line-height:1.32;margin-bottom:26px;letter-spacing:-0.01em;max-width:32ch}
-
-.section{margin-top:36px;padding-top:24px;border-top:1px solid var(--line)}
-.section-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-.section-title{font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);font-weight:700}
-.link-btn{font-size:11px;font-weight:600;padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:transparent;color:var(--muted);cursor:pointer}
-.link-btn:hover{border-color:var(--red);color:var(--red);background:var(--redsoft)}
-.list{display:flex;flex-direction:column;gap:8px}
-.item{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:var(--card);border:1px solid var(--line);border-radius:12px;transition:all 0.18s}
-.item:hover{transform:translateY(-1px);box-shadow:var(--shadow);border-color:var(--line2)}
-.item .left{flex:1;min-width:0;margin-right:10px}
-.item .t{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px}
-.item .m{font-size:11px;color:var(--muted);margin-top:2px;display:flex;gap:8px}
-.item .d{font-weight:800;font-variant-numeric:tabular-nums;background:var(--card2);border:1px solid var(--line);padding:5px 9px;border-radius:8px;font-size:12px;white-space:nowrap}
-.empty{font-size:13px;color:var(--muted);padding:10px 0;line-height:1.5}
-.totals{margin-top:12px;font-size:11px;color:var(--muted);display:flex;gap:14px;flex-wrap:wrap}
+/* Victory */
+.victory-kicker{font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:16px}
+.victory-time{font-size:80px;font-weight:900;letter-spacing:-0.06em;line-height:0.85;color:var(--accent);font-variant-numeric:tabular-nums;margin-bottom:16px}
+@media(min-width:700px){.victory-time{font-size:96px}}
+.victory-task{font-size:14px;color:var(--muted);margin-bottom:8px}
+.victory-task b{color:var(--text);font-weight:700}
+.victory-msg{font-size:28px;font-weight:800;line-height:1.15;letter-spacing:-0.02em;color:var(--text);margin-bottom:32px;max-width:20ch}
+@media(min-width:700px){.victory-msg{font-size:32px}}
+.victory-actions{display:flex;flex-direction:column;gap:10px;margin-bottom:32px}
+.history-section{margin-top:8px;border-top:1px solid var(--line);padding-top:24px}
+.history-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.history-title{font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.clear-btn{font-size:11px;color:var(--muted);text-decoration:underline;text-underline-offset:3px}
+.clear-btn:hover{color:var(--text)}
+.history-list{display:flex;flex-direction:column}
+.history-item{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--line);gap:12px}
+.history-item .left{flex:1;min-width:0}
+.history-item .task{font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.history-item .meta{font-size:11px;color:var(--muted);margin-top:3px;display:flex;gap:8px}
+.history-item .dur{font-size:13px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums;white-space:nowrap}
+.empty-history{font-size:13px;color:var(--muted);padding:12px 0}
+.totals{margin-top:14px;font-size:11px;color:var(--muted);display:flex;gap:16px;flex-wrap:wrap}
 .totals b{color:var(--text)}
 
-.lb{margin-top:22px;padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--card2)}
-.lb-title{font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:10px}
-.lb-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:13px}
+/* Leaderboard */
+.leaderboard{margin-top:32px;border-top:1px solid var(--line);padding-top:24px}
+.lb-title{font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:14px}
+.lb-list{display:flex;flex-direction:column}
+.lb-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
 .lb-row:last-child{border-bottom:none}
-.lb-rank{width:24px;height:24px;border-radius:50%;background:var(--card);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:var(--muted);flex-shrink:0}
-.lb-rank.gold{background:var(--red);color:#fff;border-color:var(--red)}
+.lb-rank{font-size:13px;font-weight:800;color:var(--muted);width:22px;flex-shrink:0;font-variant-numeric:tabular-nums}
+.lb-row.top1 .lb-rank{color:var(--accent)}
+.lb-row.top2 .lb-rank{color:#ff6666}
+.lb-row.top3 .lb-rank{color:#ff9999}
 .lb-info{flex:1;min-width:0}
-.lb-user{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.lb-task{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.lb-time{font-weight:800;color:var(--red);font-variant-numeric:tabular-nums;white-space:nowrap}
+.lb-user{font-size:13px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lb-task{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+.lb-time{font-size:13px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums;white-space:nowrap}
+.lb-row.top1 .lb-time{color:var(--accent)}
 
-footer{margin-top:36px;padding-top:16px;border-top:1px solid var(--line);font-size:11px;color:var(--muted2);text-align:center}
-footer a{color:var(--muted);text-decoration:none;border-bottom:1px solid var(--line)}
+footer{padding:20px;text-align:center;font-size:11px;color:var(--muted);border-top:1px solid var(--line);margin-top:auto}
+footer a{color:var(--muted);text-decoration:none;border-bottom:1px solid var(--line2)}
 footer a:hover{color:var(--text)}
 
-.blink{position:fixed;inset:0;background:rgba(225,29,72,0.12);pointer-events:none;opacity:0;z-index:30}
-.blink.show{animation:blink 0.8s ease}
-@keyframes blink{0%{opacity:0}15%{opacity:1}40%{opacity:0.5}70%{opacity:1}100%{opacity:0}}
+/* Blink overlay */
+.blink-overlay{position:fixed;inset:0;background:rgba(255,51,51,0.14);pointer-events:none;opacity:0;z-index:40}
+.blink-overlay.show{animation:blinkFlash 0.8s ease}
+@keyframes blinkFlash{0%{opacity:0}15%{opacity:1}35%{opacity:0.6}60%{opacity:1}100%{opacity:0}}
 
-.modal{position:fixed;inset:0;background:rgba(0,0,0,0.4);backdrop-filter:blur(12px);display:none;align-items:center;justify-content:center;padding:18px;z-index:40}
+/* Modal */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,0.75);display:none;align-items:center;justify-content:center;padding:20px;z-index:50}
 .modal.show{display:flex}
-.card-box{background:var(--card);border-radius:18px;padding:16px;max-width:380px;width:100%;border:1px solid var(--line);box-shadow:0 20px 60px rgba(0,0,0,0.2)}
-.card-box img{width:100%;border-radius:12px;background:var(--card2);aspect-ratio:1;display:block}
-.card-actions{margin-top:12px;display:flex;gap:10px}
-.card-actions button{flex:1}
-
-@media(min-width:800px){
-.wrap{max-width:640px;padding:32px 20px 48px 20px}
-.timer{font-size:96px}
-.final-time{font-size:84px}
-.title{font-size:16px}
-}
+.card-preview{width:100%;max-width:360px;background:var(--bg);border:1px solid var(--line2);padding:14px}
+.card-preview img{width:100%;display:block;background:var(--surface);aspect-ratio:1}
+.card-actions{margin-top:12px;display:flex;gap:8px}
+.card-actions button{flex:1;height:44px;font-size:13px;font-weight:700;border-radius:2px}
 </style>
 </head>
 <body>
-<div class="blink" id="blinkOverlay"></div>
+<div class="blink-overlay" id="blinkOverlay"></div>
 
-<div class="wrap">
-  <div class="nav">
-    <div class="logo"><b>PROCRASTINATION</b> TIMER</div>
-    <div style="display:flex;gap:8px;align-items:center">
-      <div class="pill" id="userCountPill">0 users</div>
-      <button class="icon-btn" id="themeBtn" aria-label="theme">◐</button>
+<div class="app">
+  <!-- Landing - full viewport -->
+  <div class="screen landing active" id="landingScreen">
+    <div class="screen-inner">
+      <div class="top-label">Procrastination Timer</div>
+      <h1 class="big-question">What were you supposed to be doing?</h1>
+      
+      <div style="flex:1;display:flex;flex-direction:column;gap:4px;justify-content:center;max-width:100%">
+        <div class="field">
+          <label>Username - must be unique globally</label>
+          <input id="usernameInput" type="text" placeholder="yash, alex99" maxlength="20" autocomplete="off">
+          <div class="help" id="usernameStatus"></div>
+        </div>
+        <div class="field">
+          <label>Task you are avoiding</label>
+          <input id="taskInput" type="text" placeholder="finish report, gym, call mom" maxlength="80" autocomplete="off" autofocus>
+        </div>
+        <div class="char-row">
+          <div></div>
+          <div class="char-count" id="charCount">0 / 80</div>
+        </div>
+      </div>
+
+      <div class="landing-bottom">
+        <button id="startBtn" class="btn btn-red" disabled>Start the shame</button>
+        <div class="user-count" id="userCountPill">0 users</div>
+      </div>
     </div>
   </div>
 
-  <div class="main">
-    <div class="screen landing active" id="landingScreen">
-      <div class="title">What were you supposed to be doing?</div>
-
-      <div class="field">
-        <label>Username - must be unique globally</label>
-        <input id="usernameInput" class="input small" type="text" placeholder="yash, alex99" maxlength="20" autocomplete="off">
-        <div class="help" id="usernameStatus"></div>
+  <!-- Timer - full viewport -->
+  <div class="screen timer-screen" id="timerScreen">
+    <div class="screen-inner">
+      <div class="timer-top">
+        <div class="avoiding-label"><span id="userDisplay"></span> avoiding</div>
+        <div class="avoiding-task" id="taskDisplay">something</div>
       </div>
-
-      <div class="field">
-        <label>Task you are avoiding</label>
-        <input id="taskInput" class="input" type="text" placeholder="finish report, gym, call mom" maxlength="80" autocomplete="off" autofocus>
-        <div class="row">
-          <div class="help">No judgement. Well, some.</div>
-          <div class="count" id="charCount">0 / 80</div>
-        </div>
+      <div class="timer-wrap">
+        <div id="timer" class="timer">00:00:00</div>
+        <div id="shameMsg" class="shame">Just getting started huh.</div>
       </div>
-
-      <button id="startBtn" class="btn btn-red" disabled>Start the shame</button>
-      <div class="hint">Beep and red blink every hour. Global leaderboard via Supabase.</div>
-    </div>
-
-    <div class="screen timer-screen" id="timerScreen">
-      <div class="timer-label"><span id="userDisplay"></span> avoiding <b id="taskDisplay">something</b> for</div>
-      <div id="timer" class="timer">00:00:00</div>
-      <div id="shameMsg" class="shame">Just getting started huh.</div>
-      <button id="stopBtn" class="btn btn-dark" style="margin-top:28px">Okay I will do it</button>
-      <div class="actions">
-        <div class="actions-row">
-          <button class="mini" id="cancelBtn">Reset</button>
-          <button class="mini" id="copyTaskBtn">Copy task</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="screen victory-screen" id="victoryScreen">
-      <div class="final-kicker">Total time wasted</div>
-      <div id="finalTime" class="final-time">00:12:34</div>
-      <div class="final-task"><span id="finalUser"></span> avoided <b id="finalTask">something</b></div>
-      <div id="finalMsg" class="final-msg">Better late than never. Barely.</div>
-      <div class="actions">
-        <button id="screenshotBtn" class="btn btn-light">Screenshot this</button>
-        <div class="actions-row">
-          <button id="shareTextBtn" class="mini">Copy share text</button>
-          <button id="restartBtn" class="mini">Start another</button>
+      <div class="timer-bottom">
+        <button id="stopBtn" class="btn btn-white">Okay I will do it</button>
+        <div style="display:flex;gap:12px;margin-top:12px;justify-content:center">
+          <button id="cancelBtn" style="font-size:11px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;font-weight:600">Reset</button>
+          <button id="copyTaskBtn" style="font-size:11px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;font-weight:600">Copy task</button>
+          <button id="themeBtn" style="font-size:11px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;font-weight:600">Theme</button>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="section" id="historySection">
-    <div class="section-head">
-      <div class="section-title">Past crimes - local</div>
-      <button id="clearHistoryBtn" class="link-btn">Clear local</button>
-    </div>
-    <div id="historyList" class="list"></div>
-    <div id="totals" class="totals"></div>
+  <!-- Victory - full viewport -->
+  <div class="screen victory-screen" id="victoryScreen">
+    <div class="screen-inner">
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:center">
+        <div class="victory-kicker">Total time wasted</div>
+        <div id="finalTime" class="victory-time">00:12:34</div>
+        <div class="victory-task"><span id="finalUser"></span> avoided <b id="finalTask">something</b></div>
+        <div id="finalMsg" class="victory-msg">Better late than never. Barely.</div>
+      </div>
+      <div class="victory-actions" style="display:flex;flex-direction:column;gap:10px">
+        <button id="screenshotBtn" class="btn btn-red">Screenshot this</button>
+        <button id="restartBtn" class="btn btn-white">Start another</button>
+        <button id="viewLbBtn" class="btn btn-dark" style="background:var(--surface);color:var(--text);border:1px solid var(--line2)">View leaderboard</button>
+      </div>
 
-    <div class="lb" id="leaderboardSection">
-      <div class="lb-title">Global leaderboard - longest procrastination</div>
-      <div id="leaderboardList"></div>
+      <div class="history-section" id="historySection">
+        <div class="history-head">
+          <div class="history-title">Past crimes - local</div>
+          <button id="clearHistoryBtn" class="clear-btn">Clear local</button>
+        </div>
+        <div id="historyList" class="history-list"></div>
+        <div id="totals" class="totals"></div>
+
+        <div class="leaderboard" id="leaderboardSection">
+          <div class="lb-title">Global leaderboard - longest procrastination</div>
+          <div id="leaderboardList"></div>
+        </div>
+      </div>
+
+      <footer>Built by Glymph Studio - <a href="http://glymph.vercel.app" target="_blank">glymph.vercel.app</a></footer>
     </div>
   </div>
-
-  <footer>Built by Glymph Studio - <a href="http://glymph.vercel.app" target="_blank">glymph.vercel.app</a></footer>
 </div>
 
 <div class="modal" id="cardModal">
-  <div class="card-box">
+  <div class="card-preview">
     <img id="cardImg" alt="card">
     <div class="card-actions">
-      <button id="downloadCardBtn" class="mini" style="background:#111;color:#fff;border-color:#111">Download PNG</button>
-      <button id="closeCardBtn" class="mini">Close</button>
+      <button id="downloadCardBtn" class="btn btn-white" style="height:44px;font-size:13px">Download PNG</button>
+      <button id="closeCardBtn" class="btn btn-dark" style="height:44px;font-size:13px;flex:1">Close</button>
     </div>
   </div>
 </div>
 
 <canvas id="cardCanvas" width="1080" height="1080" style="display:none"></canvas>
+<div style="display:none">
+  <span id="totalWastedLabel"></span>
+  <span id="liveCountPill"></span>
+  <button id="shareTextBtn"></button>
+</div>
 
 <script>
 // HOW TO PASTE SUPABASE KEYS - READ THIS
@@ -296,6 +297,8 @@ const userCountPill = $('userCountPill');
 const blinkOverlay = $('blinkOverlay');
 const leaderboardList = $('leaderboardList');
 const usernameStatus = $('usernameStatus');
+const totalWastedLabel = $('totalWastedLabel');
+const liveCountPill = $('liveCountPill');
 
 let startTime = null;
 let timerInterval = null;
@@ -369,13 +372,13 @@ function addUserLocal(u){
 }
 function updateUserCountLocal(){
   const users=loadUsers();
-  userCountPill.textContent = `${users.length} users (local)`;
+  userCountPill.textContent = `${users.length} users`;
 }
 async function updateUserCount(){
   updateUserCountLocal();
   if(supabaseClient){
     const c=await supabaseGetUserCount();
-    if(c!==null) userCountPill.textContent = `${c} users (global)`;
+    if(c!==null) userCountPill.textContent = `${c} users`;
   }
 }
 function addToHistory(task,dur,username){
@@ -391,40 +394,41 @@ function renderHistory(){
   const hist=loadHistory();
   const last5=hist.slice(0,5);
   historyList.innerHTML='';
-  if(last5.length===0){ historyList.innerHTML='<div class="empty">No crimes yet. You are either productive or new here.</div>'; totalsEl.innerHTML=''; return; }
+  if(last5.length===0){ historyList.innerHTML='<div class="empty-history">No crimes yet.</div>'; totalsEl.innerHTML=''; if(totalWastedLabel) totalWastedLabel.textContent=''; return; }
   last5.forEach(item=>{
     const div=document.createElement('div');
-    div.className='item';
-    div.innerHTML=`<div class="left"><div class="t">${esc(item.task)}</div><div class="m"><span>${esc(item.username||'anon')}</span><span>${fmtRel(item.ts)}</span></div></div><div class="d">${fmtHuman(item.durationSec)}</div>`;
+    div.className='history-item';
+    div.innerHTML=`<div class="left"><div class="task">${esc(item.task)}</div><div class="meta"><span>${esc(item.username||'anon')}</span><span>${fmtRel(item.ts)}</span></div></div><div class="dur">${fmtHuman(item.durationSec)}</div>`;
     historyList.appendChild(div);
   });
   const total=hist.reduce((a,b)=>a+b.durationSec,0);
   const avg=hist.length?Math.round(total/hist.length):0;
   const longest=hist.length?Math.max(...hist.map(h=>h.durationSec)):0;
   totalsEl.innerHTML=`<span><b>Total</b> ${fmtHuman(total)} wasted</span><span><b>Avg</b> ${fmtHuman(avg)}</span><span><b>Longest</b> ${fmtHuman(longest)}</span>`;
+  if(totalWastedLabel) totalWastedLabel.textContent = `${fmtHuman(total)} total`;
 }
 async function renderLeaderboard(){
   const hist=loadHistory();
   if(!supabaseClient){
-    if(hist.length===0){ leaderboardList.innerHTML='<div class="empty">No leaderboard yet. Add Supabase keys for global board.</div>'; return; }
+    if(hist.length===0){ leaderboardList.innerHTML='<div class="empty-history">No leaderboard yet. Add Supabase keys for global.</div>'; return; }
     const sorted=[...hist].sort((a,b)=>b.durationSec-a.durationSec).slice(0,5);
     leaderboardList.innerHTML='';
     sorted.forEach((it,i)=>{
       const div=document.createElement('div');
-      div.className='lb-row';
-      div.innerHTML=`<div class="lb-rank ${i===0?'gold':''}">${i+1}</div><div class="lb-info"><div class="lb-user">${esc(it.username||'anon')}</div><div class="lb-task">${esc(it.task)}</div></div><div class="lb-time">${fmtHuman(it.durationSec)}</div>`;
+      div.className='lb-row'+(i<3?' top'+(i+1):'');
+      div.innerHTML=`<div class="lb-rank">${i+1}</div><div class="lb-info"><div class="lb-user">${esc(it.username||'anon')}</div><div class="lb-task">${esc(it.task)}</div></div><div class="lb-time">${fmtHuman(it.durationSec)}</div>`;
       leaderboardList.appendChild(div);
     });
     return;
   }
-  leaderboardList.innerHTML='<div class="empty">Loading global leaderboard...</div>';
+  leaderboardList.innerHTML='<div class="empty-history">Loading global leaderboard...</div>';
   const data=await supabaseGetLeaderboard();
-  if(data.length===0){ leaderboardList.innerHTML='<div class="empty">No global data yet. Be first.</div>'; return; }
+  if(data.length===0){ leaderboardList.innerHTML='<div class="empty-history">No global data yet.</div>'; return; }
   leaderboardList.innerHTML='';
   data.slice(0,10).forEach((it,i)=>{
     const div=document.createElement('div');
-    div.className='lb-row';
-    div.innerHTML=`<div class="lb-rank ${i===0?'gold':''}">${i+1}</div><div class="lb-info"><div class="lb-user">${esc(it.username)}</div><div class="lb-task">${esc(it.task)}</div></div><div class="lb-time">${fmtHuman(it.duration_sec)}</div>`;
+    div.className='lb-row'+(i<3?' top'+(i+1):'');
+    div.innerHTML=`<div class="lb-rank">${i+1}</div><div class="lb-info"><div class="lb-user">${esc(it.username)}</div><div class="lb-task">${esc(it.task)}</div></div><div class="lb-time">${fmtHuman(it.duration_sec)}</div>`;
     leaderboardList.appendChild(div);
   });
 }
@@ -455,12 +459,17 @@ async function validateInputs(){
     usernameStatus.textContent='Use 2-20 letters, numbers, underscore only.';
     usernameStatus.className='help error';
   }else if(userRaw && supabaseClient){
-    const chk=await supabaseCheckUsername(userRaw);
-    if(!chk.available){
-      usernameStatus.textContent='Username taken globally, you can still use it if it is yours.';
-      usernameStatus.className='help error';
-    }else{
-      usernameStatus.textContent='Username available globally.';
+    try{
+      const {data}=await supabaseClient.from('users').select('username').eq('username',userRaw).limit(1);
+      if(data && data.length>0){
+        usernameStatus.textContent='Username taken globally, you can still use it if it is yours.';
+        usernameStatus.className='help error';
+      }else{
+        usernameStatus.textContent='Username available globally.';
+        usernameStatus.className='help';
+      }
+    }catch{
+      usernameStatus.textContent=userRaw?'Looks good.':'';
       usernameStatus.className='help';
     }
   }else{
@@ -486,6 +495,7 @@ async function startTimer(){
   shameMsg.textContent=SHAME[0].text;
   try{ localStorage.setItem('active_procrastination', JSON.stringify({task,user,start:startTime})); }catch{}
   showScreen('timer');
+  if(liveCountPill) liveCountPill.style.display='inline-block';
   if(timerInterval) clearInterval(timerInterval);
   timerInterval=setInterval(tick,250);
   try{ if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)(); }catch{}
@@ -524,6 +534,7 @@ function stopTimer(){
   const sec=Math.floor((Date.now()-startTime)/1000);
   if(timerInterval){ clearInterval(timerInterval); timerInterval=null; }
   try{ localStorage.removeItem('active_procrastination'); }catch{}
+  if(liveCountPill) liveCountPill.style.display='none';
   finalTime.textContent=fmtHMS(sec);
   finalTask.textContent=currentTask;
   finalUser.textContent=currentUser;
@@ -535,29 +546,26 @@ function cancelTimer(){
   if(timerInterval){ clearInterval(timerInterval); timerInterval=null; }
   startTime=null;
   try{ localStorage.removeItem('active_procrastination'); }catch{}
+  if(liveCountPill) liveCountPill.style.display='none';
   showScreen('landing');
 }
 
 function drawCard(task,dur,shame,user){
   const ctx=cardCanvas.getContext('2d');
   const W=1080,H=1080;
-  const isDark=document.documentElement.getAttribute('data-theme')==='dark';
-  const bg=isDark?'#0a0a0a':'#ffffff';
-  const bg2=isDark?'#171717':'#f6f5f3';
-  const txt=isDark?'#f5f3f0':'#111111';
-  ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
-  ctx.fillStyle='#e11d48'; ctx.fillRect(0,0,W,14);
-  ctx.fillStyle=bg2; ctx.fillRect(0,14,W,180);
-  ctx.fillStyle='#8a8a8a'; ctx.font='700 24px -apple-system,BlinkMacSystemFont,Segoe UI,Roboto'; ctx.fillText('PROCRASTINATION TIMER',64,110);
+  ctx.fillStyle='#0f0f0f'; ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#ff3333'; ctx.fillRect(0,0,W,10);
+  ctx.fillStyle='#1a1a1a'; ctx.fillRect(0,10,W,160);
+  ctx.fillStyle='#555555'; ctx.font='700 22px Inter, sans-serif'; ctx.fillText('PROCRASTINATION TIMER',64,96);
   let y=200;
-  ctx.fillStyle='#8a8a8a'; ctx.font='500 26px -apple-system,BlinkMacSystemFont,Segoe UI'; ctx.fillText(`${user} avoided`,64,y); y+=54;
-  ctx.fillStyle=txt; ctx.font='800 54px -apple-system,BlinkMacSystemFont,Segoe UI'; wrapLines(ctx,task,64,W-128,54).slice(0,2).forEach(l=>{ ctx.fillText(l,64,y); y+=64; });
-  y+=18; ctx.fillStyle='#8a8a8a'; ctx.font='500 26px -apple-system,BlinkMacSystemFont,Segoe UI'; ctx.fillText('for',64,y); y+=86;
-  ctx.fillStyle='#e11d48'; ctx.font='900 96px -apple-system,BlinkMacSystemFont,Segoe UI'; ctx.fillText(fmtHMS(dur),64,y); y+=54;
-  ctx.fillStyle=txt; ctx.font='600 26px -apple-system,BlinkMacSystemFont,Segoe UI'; ctx.fillText(`(${fmtHuman(dur)} wasted)`,64,y); y+=90;
-  ctx.fillStyle=bg2; const bx=64,bw=W-128,bh=150,by=y,r=18; ctx.beginPath(); ctx.moveTo(bx+r,by); ctx.lineTo(bx+bw-r,by); ctx.quadraticCurveTo(bx+bw,by,bx+bw,by+r); ctx.lineTo(bx+bw,by+bh-r); ctx.quadraticCurveTo(bx+bw,by+bh,bx+bw-r,by+bh); ctx.lineTo(bx+r,by+bh); ctx.quadraticCurveTo(bx,by+bh,bx,by+bh-r); ctx.lineTo(bx,by+r); ctx.quadraticCurveTo(bx,by,bx+r,by); ctx.fill();
-  ctx.fillStyle=isDark?'#aaaaaa':'#555555'; ctx.font='500 26px -apple-system,BlinkMacSystemFont,Segoe UI'; let sy=by+52; wrapLines(ctx,`"${shame}"`,bx+28,bw-56,26).slice(0,3).forEach(l=>{ ctx.fillText(l,bx+28,sy); sy+=38; });
-  ctx.fillStyle='#aaaaaa'; ctx.font='600 22px -apple-system,BlinkMacSystemFont,Segoe UI'; ctx.fillText('Built by Glymph Studio - glymph.vercel.app',64,H-64);
+  ctx.fillStyle='#555555'; ctx.font='500 24px Inter, sans-serif'; ctx.fillText(`${user} avoided`,64,y); y+=52;
+  ctx.fillStyle='#ffffff'; ctx.font='800 52px Inter, sans-serif'; wrapLines(ctx,task,64,W-128,52).slice(0,2).forEach(l=>{ ctx.fillText(l,64,y); y+=62; });
+  y+=18; ctx.fillStyle='#555555'; ctx.font='500 24px Inter'; ctx.fillText('for',64,y); y+=84;
+  ctx.fillStyle='#ff3333'; ctx.font='900 92px Inter, sans-serif'; ctx.fillText(fmtHMS(dur),64,y); y+=52;
+  ctx.fillStyle='#ffffff'; ctx.font='600 26px Inter'; ctx.fillText(`(${fmtHuman(dur)} wasted)`,64,y); y+=88;
+  ctx.fillStyle='#1a1a1a'; const bx=64,bw=W-128,bh=140,by=y,r=4; ctx.beginPath(); ctx.moveTo(bx+r,by); ctx.lineTo(bx+bw-r,by); ctx.quadraticCurveTo(bx+bw,by,bx+bw,by+r); ctx.lineTo(bx+bw,by+bh-r); ctx.quadraticCurveTo(bx+bw,by+bh,bx+bw-r,by+bh); ctx.lineTo(bx+r,by+bh); ctx.quadraticCurveTo(bx,by+bh,bx,by+bh-r); ctx.lineTo(bx,by+r); ctx.quadraticCurveTo(bx,by,bx+r,by); ctx.fill();
+  ctx.fillStyle='#888888'; ctx.font='500 24px Inter'; let sy=by+52; wrapLines(ctx,`"${shame}"`,bx+20,bw-40,24).slice(0,3).forEach(l=>{ ctx.fillText(l,bx+20,sy); sy+=36; });
+  ctx.fillStyle='#555555'; ctx.font='600 20px Inter'; ctx.fillText('Built by Glymph Studio - glymph.vercel.app',64,H-56);
 }
 function wrapLines(ctx,text,x,maxW){
   const words=String(text).split(' ');
@@ -591,15 +599,14 @@ function copyShareText(){
 }
 function initTheme(){
   const saved=localStorage.getItem('procrastination_theme');
-  const prefersDark=window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const theme=saved||(prefersDark?'dark':'light');
-  document.documentElement.setAttribute('data-theme',theme);
+  if(saved) document.documentElement.setAttribute('data-theme', saved);
 }
 function toggleTheme(){
   const cur=document.documentElement.getAttribute('data-theme');
   const next=cur==='dark'?'light':'dark';
-  document.documentElement.setAttribute('data-theme',next);
-  localStorage.setItem('procrastination_theme',next);
+  if(next==='light') document.documentElement.removeAttribute('data-theme');
+  else document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('procrastination_theme', next);
 }
 
 usernameInput.addEventListener('input', validateInputs);
@@ -614,13 +621,15 @@ stopBtn.addEventListener('click', stopTimer);
 cancelBtn.addEventListener('click', cancelTimer);
 copyTaskBtn.addEventListener('click', ()=>{ navigator.clipboard.writeText(currentTask); });
 restartBtn.addEventListener('click', ()=>{ showScreen('landing'); taskInput.value=''; charCount.textContent='0 / 80'; startBtn.disabled=true; });
+const viewLbBtn = document.getElementById('viewLbBtn');
+if(viewLbBtn) viewLbBtn.addEventListener('click', ()=>{ document.getElementById('leaderboardSection').scrollIntoView({behavior:'smooth'}); });
 clearHistoryBtn.addEventListener('click', ()=>{ if(confirm('Clear local history?')){ saveHistory([]); renderHistory(); renderLeaderboard(); } });
 screenshotBtn.addEventListener('click', openCard);
 closeCardBtn.addEventListener('click', closeCard);
 downloadCardBtn.addEventListener('click', downloadCard);
 shareTextBtn.addEventListener('click', copyShareText);
 cardModal.addEventListener('click', e=>{ if(e.target===cardModal) closeCard(); });
-themeBtn.addEventListener('click', toggleTheme);
+if(themeBtn) themeBtn.addEventListener('click', toggleTheme);
 
 (async function init(){
   initTheme();
