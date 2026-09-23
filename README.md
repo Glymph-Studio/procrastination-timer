@@ -15,17 +15,4 @@ Built by [@Yash-Tripath1](https://github.com/Yash-Tripath1) for Glymph Studio
 - Tab title live, visibility shame detection, resume on reload
 - Mobile-first, slick animations
 
-### Stack
-- Single index.html, vanilla JS, no deps
-- Canvas for share card
-- localStorage for history
-
-### Deploy
-```bash
-git add .
-git commit -m "feat: procrastination timer"
-git push
-```
-Vercel auto-deploys.
-
 Built by Glymph Studio - glymph.vercel.app
